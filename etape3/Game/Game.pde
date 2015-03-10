@@ -1,4 +1,4 @@
-float positionX, positionY, speed, limitAngle;
+float positionX, positionY, speed;
 PFont f;
 void setup()  {
   size(800, 800, P3D);
@@ -8,7 +8,6 @@ void setup()  {
   positionX = -PI/6;
   positionY = PI/3;
   speed = 0.2;
-  limitAngle = PI/3;
   
   f = createFont("Arial",16,true);
 }
@@ -25,7 +24,7 @@ void draw()  {
   popMatrix();
   
   textFont(f,16);
-  text ("speed : "+ speed, 0, 16);
+  text ("speed : "+ speed + "" , 0, 16);
 }
 
 void keyPressed(){
