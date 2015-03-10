@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-float positionX, positionY, speed;
-=======
 float depth = 2000;
 float speed;
 float rx, rz;
 float positionX, positionY;
->>>>>>> origin/master
 PFont f;
 
 void setup() {
@@ -13,14 +9,7 @@ void setup() {
   size(800, 800, P3D);
   noStroke();
   fill(204);
-<<<<<<< HEAD
-  
-  positionX = -PI/6;
-  positionY = PI/3;
-  speed = 0.2;
-  
-=======
->>>>>>> origin/master
+
   f = createFont("Arial",16,true);
 }
 
