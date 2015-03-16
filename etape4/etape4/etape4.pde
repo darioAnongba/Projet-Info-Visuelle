@@ -1,6 +1,6 @@
-Mover mover;
+/*Mover mover;
 void setup() {
-  size(800,800);
+  size(700,600);
   mover = new Mover();
   frameRate(120);
 }
@@ -11,3 +11,4 @@ void draw() {
   mover.checkEdges();
   mover.display();
 }
+*/

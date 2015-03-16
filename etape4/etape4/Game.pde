@@ -8,7 +8,11 @@ float boardY = 400;
 float radius = 48;
 PFont f;
 
+Mover mover;
+
 void setup() {
+  mover = new Mover();
+  frameRate(80);
   speed = 0.2;
   size(800, 800, P3D);
   noStroke();
@@ -21,17 +25,9 @@ void draw() {
   background(255);
   lights();
   ambient(20);
-  pushMatrix();
-    translate(width/2, height/2, 0);
-    rotateZ(rz);
-    rotateX(rx);
-    box(boardX, boardThickness, boardY);
-    pushMatrix();
-      lights();
-      translate(0, -boardThickness/2-radius);
-      sphere(radius);
-    popMatrix();
-  popMatrix();
+  mover.update();
+  mover.checkEdges();
+  mover.display();
   
   textFont(f,16);
   text ("speed : "+ speed + "" , 0, 16);
