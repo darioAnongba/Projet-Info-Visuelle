@@ -1,43 +1,41 @@
+float gravityConstant = 0.01;
+
 class Mover {
   PVector location;
   PVector velocity;
-  PVector gravity;
-  PVector friction;
-  
-  float gravityConstant = 0.1,
-    frictionMagnitude,
-    mu = 0.01,
-    normalForce = 1;
+  PVector gravityForce;
   
   Mover() {
     location = new PVector(0, 0, 0);
     velocity = new PVector(0, 0, 0);
-    gravity = new PVector(0, 0, 0);
-    friction = new PVector(0, 0, 0);
-  }
-  
+    gravityForce = new PVector(0, 0, 0);
+  } 
   void update() {
-    gravity.x = sin(rotX) * gravityConstant;
-    gravity.z = sin(rotZ) * gravityConstant;
-
-    frictionMagnitude = normalForce * mu;
-    friction = velocity.get();
+    gravityForce.x = sin(rz) * gravityConstant;
+    gravityForce.z = sin(rx) * gravityConstant;
+    float normalForce = -1;
+    float mu = 0.01;
+    float frictionMagnitude = normalForce * mu;
+    PVector friction = velocity.get();
     friction.mult(-1);
     friction.normalize();
     friction.mult(frictionMagnitude);
     
-    velocity.add(gravity);
-    velocity.add(friction);
+    System.out.println("grav force: " + gravityForce);
+    System.out.println("friction: " + friction);
+    velocity.add(gravityForce);
+    //velocity.add(friction);
     location.add(velocity);
   }  
 
   void display() {
     pushMatrix();
       translate(width/2, height/2, 0);
-      rotateZ(rotZ);
-      rotateX(rotX);
+      rotateZ(rz);
+      rotateX(rx);
       box(boardX, boardThickness, boardY);
       pushMatrix();
+        lights();
         translate(location.x, -boardThickness/2-radius, location.z);
         sphere(radius);
       popMatrix();
@@ -49,7 +47,7 @@ class Mover {
       velocity.x = -velocity.x;
       location.x = boardX/2 - radius;
     }
-    else if (location.x - radius < -boardX/2) {
+    else if (location.x  - radius < -boardX/2) {
       velocity.x = -velocity.x;
       location.x = -boardX/2 + radius;
     }

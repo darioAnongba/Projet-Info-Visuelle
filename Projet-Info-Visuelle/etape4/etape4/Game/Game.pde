@@ -1,41 +1,44 @@
-float speed,
-  rotX, rotZ,
-  positionX, positionY;
-  
-float depth = 2000, 
-  boardThickness = 20,
-  boardX = 500,
-  boardY = 500,
-  radius = 28;
-
+float depth = 2000;
+float speed;
+float rx, rz;
+float positionX, positionY;
+float boardThickness = 20;
+float boardX = 400;
+float boardY = 400;
+float radius = 48;
 PFont f;
 
 Mover mover;
 
 void setup() {
-  speed = 0.2;
-  
-  size(1000, 1000, P3D);
-  frameRate(80); 
-  f = createFont("Arial",16,true);
-  
   mover = new Mover();
+  frameRate(80);
+  speed = 0.2;
+  size(800, 800, P3D);
+  noStroke();
+  fill(204);
+
+  f = createFont("Arial",16,true);
 }
 
 void draw() {
   background(255);
-  
+  lights();
+  ambient(20);
   mover.update();
   mover.checkEdges();
   mover.display();
+  
+  textFont(f,16);
+  text ("speed : "+ speed + "" , 0, 16);
 }
 
 void mouseDragged() {
-  rotZ = clamp(map(mouseX*(1+speed), 0, width, -PI/3, PI/3), -PI/3, PI/3);
-  rotX = clamp(map(mouseY*(1+speed), 0, height, -PI/3, PI/3), -PI/3, PI/3);
+  rz = clamp(map(mouseX*(1+speed), 0, width, -PI/3, PI/3), -PI/3, PI/3);
+  rx = clamp(map(mouseY*(1+speed), 0, height, -PI/3, PI/3), -PI/3, PI/3);
 }
 
-private float clamp(float value, float min, float max) {
+float clamp(float value, float min, float max) {
   if (value > max) return max;
   else if (value < min) return min;
   else return value;
