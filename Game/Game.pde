@@ -1,12 +1,12 @@
 float speed,
   rotX, rotZ,
-  positionX, positionY;
+  positionX, positionY, diffX, diffY;
   
 float depth = 2000, 
   boardThickness = 20,
   boardX = 500,
   boardY = 500,
-  radius = 28;
+  radius = 20;
 
 PFont f;
 
@@ -15,8 +15,8 @@ Mover mover;
 void setup() {
   speed = 0.2;
   
-  size(1000, 1000, P3D);
-  frameRate(80); 
+  size(800, 800, P3D);
+  frameRate(100); 
   f = createFont("Arial",16,true);
   
   mover = new Mover();
@@ -31,8 +31,11 @@ void draw() {
 }
 
 void mouseDragged() {
-  rotZ = clamp(map(mouseX*(1+speed), 0, width, -PI/3, PI/3), -PI/3, PI/3);
-  rotX = clamp(map(mouseY*(1+speed), 0, height, -PI/3, PI/3), -PI/3, PI/3);
+  diffX += map(mouseX, 0, width, -PI/3, PI/3) - map(pmouseX, 0, width, -PI/3, PI/3);
+  diffY += map(mouseY, 0, height, -PI/3, PI/3) - map(pmouseY, 0, height, -PI/3, PI/3);
+  
+  rotZ = clamp(diffX, -PI/3, PI/3);
+  rotX = clamp(diffY, -PI/3, PI/3);
 }
 
 private float clamp(float value, float min, float max) {
@@ -47,13 +50,13 @@ void mouseWheel(MouseEvent event) {
 }
 
 void keyPressed(){
-  if(keyCode == LEFT) {
+  if (keyCode == LEFT) {
     positionY += speed;
   }
   else if (keyCode == RIGHT){
     positionY -= speed;
   }
-  if(keyCode == UP) {
+  if (keyCode == UP) {
     positionX += speed;
   }
   else if (keyCode == DOWN){

@@ -4,10 +4,11 @@ class Mover {
   PVector gravity;
   PVector friction;
   
-  float gravityConstant = 0.1,
+  float gravityConstant = 0.15,
     frictionMagnitude,
-    mu = 0.01,
-    normalForce = 1;
+    mu = 0.02,
+    normalForce = 1,
+    elasticity = 0.7;
   
   Mover() {
     location = new PVector(0, 0, 0);
@@ -17,8 +18,8 @@ class Mover {
   }
   
   void update() {
-    gravity.x = sin(rotX) * gravityConstant;
-    gravity.z = sin(rotZ) * gravityConstant;
+    gravity.x = sin(rotZ) * gravityConstant;
+    gravity.z = -sin(rotX) * gravityConstant;
 
     frictionMagnitude = normalForce * mu;
     friction = velocity.get();
@@ -46,19 +47,19 @@ class Mover {
 
   void checkEdges() {
     if (location.x + radius > boardX/2) {
-      velocity.x = -velocity.x;
+      velocity.x = -velocity.x * elasticity;
       location.x = boardX/2 - radius;
     }
     else if (location.x - radius < -boardX/2) {
-      velocity.x = -velocity.x;
+      velocity.x = -velocity.x * elasticity;
       location.x = -boardX/2 + radius;
     }
     if (location.z + radius > boardY/2) {
-      velocity.z = -velocity.z;
+      velocity.z = -velocity.z * elasticity;
       location.z = boardY/2 - radius;
     }
     else if (location.z - radius < -boardY/2) {
-      velocity.z = -velocity.z;
+      velocity.z = -velocity.z * elasticity;
       location.z = -boardY/2 + radius;
     }
   }
