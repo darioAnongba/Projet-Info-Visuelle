@@ -127,7 +127,6 @@ float[][] translationMatrix(float x, float y, float z) {
 }
 
 float[] matrixProduct(float[][] a, float[] b) {
-  System.out.println(a.length);
   float[] toReturn = new float[a.length];
   for (int i = 0; i < a.length; i++) {
     for (int j = 0; j < b.length; j++) {

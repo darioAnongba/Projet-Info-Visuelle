@@ -1,7 +1,5 @@
 class Mover {
   private final float GRAVITY_CONSTANT = 0.15;
-  private final float BOUNCE_CONSTANT = 0.8;
-
 
   private PVector location, velocity, gravity, friction;
   private float frictionMagnitude, mu, normalForce, elasticity;
@@ -67,21 +65,5 @@ class Mover {
   }
   
   void checkCylinderCollision(){
-    for (Cylinder c : cylinders) {
-      PVector cL = new PVector(c.location.x - width/2, -(BOARD_THICKNESS/2 + Cylinder.h/2), c.location.z - height/2);      
-      if (Math.abs(cL.dist(location)) <= BALL_RADIUS + Cylinder.r1) {
-        PVector n = new PVector(cL.x, cL.y, cL.z);
-        n.sub(location);       
-        n.normalize();
-        location.x = cL.x - n.x*(BALL_RADIUS + Cylinder.r1);
-        location.z = cL.z - n.z*(BALL_RADIUS + Cylinder.r1);
-        float numb = velocity.mag();
-        numb *= Math.cos(PVector.angleBetween(velocity, n));
-        numb *= 2;
-        n.mult(numb);
-        velocity.sub(n);
-        velocity.mult(BOUNCE_CONSTANT);
-    }
-   }
   }
 }
