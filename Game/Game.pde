@@ -1,53 +1,54 @@
-float speed,
-  rotX, rotZ,
-  positionX, positionY,
-  diffX, diffY,
-  toDrawX, toDrawY;
-  
-float depth = 2000, 
-  boardThickness = 20,
-  boardX = 500,
-  boardY = 500,
-  radius = 20;
-  
-boolean released = true,
-  somethingToDraw = false;
+// Board values
+final int BOARD_THICKNESS = 20;
+final int BOARD_SIZE = 700;
+float rotX, rotY, rotZ;
+float diffX, diffY;
+float speed;
 
-PFont f;
+// Ball values
+final int BALL_RADIUS = 20;
 
-Mover mover;
+// Global values
+final int DEPTH = 2000;
+boolean interactionMode, canAddCylinder;
+Mover ball;
+Cylinder cylinder;
+ArrayList<Cylinder> cylinders;
 
 void setup() {
-  speed = 0.2;
+  size(1000, 800, P3D);
+  frameRate(100);
   
-  size(800, 800, P3D);
-  frameRate(100); 
-  f = createFont("Arial",16,true);
-  
-  mover = new Mover();
+  rotX = 0;
+  rotY = 0;
+  rotZ = 0; 
+  speed = 0.1;
+  interactionMode = false;
+  canAddCylinder = false;
+  ball = new Mover();
+  cylinder = new Cylinder(0, 0);
+  cylinders = new ArrayList();
 }
 
 void draw() {
   background(255);
   
-  if(!released){
-      pushMatrix();
-        rect(width/2-(boardX/2), height/2-(boardY/2), boardX, boardY);
-        translate(mouseX, mouseY, 30);
-        drawCylinder(50, 40, 40, 60);
-      popMatrix();
-      
-      if(somethingToDraw){
-        pushMatrix();
-          translate(toDrawX, toDrawY, 30);
-          drawCylinder(50, 40, 40, 60);
-        popMatrix();
-      }
+  if(interactionMode){
+    interactionMode();
+    ball.displayBall2D();
   }
-  else {   
-    mover.update();
-    mover.checkEdges();
-    mover.display();
+  else {
+    camera(width/2, -height/2, (height/2.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0);
+    translate(width/2, height/2, 0);
+    rotateZ(rotZ);
+    rotateX(rotX);
+    box(BOARD_SIZE, BOARD_THICKNESS, BOARD_SIZE);
+    
+    ball.update();
+    ball.checkEdges();
+    ball.displayBall3D();
+    
+    drawCylinders(true);
   }
 }
 
@@ -71,64 +72,62 @@ void mouseWheel(MouseEvent event) {
 }
 
 void keyPressed(){
-  if (keyCode == LEFT) {
-    positionY += speed;
-  }
-  else if (keyCode == RIGHT){
-    positionY -= speed;
-  }
-  else if (keyCode == UP) {
-    positionX += speed;
-  }
-  else if (keyCode == DOWN){
-    positionX -= speed;
-  }
-  else if (keyCode == SHIFT){
-    released = false;
+  if (keyCode == LEFT)
+    rotY += speed;
+  else if (keyCode == RIGHT)
+    rotY -= speed;
+  else if (keyCode == SHIFT)
+    interactionMode = true;
+  else if (keyCode == UP){
+    System.out.println();
   }
 }
 
 void keyReleased(){
-  if(keyCode == SHIFT){
-    released = true;
-  }
+  if(keyCode == SHIFT)
+    interactionMode = false;
 }
 
 void mouseClicked(){
-  somethingToDraw = true;
-  toDrawX = mouseX;
-  toDrawY = mouseY;
+  if(interactionMode && canAddCylinder){
+    cylinders.add(new Cylinder(mouseX, mouseY));
+  }
 }
 
-void drawCylinder( int sides, float r1, float r2, float h)
-{
-    float angle = 360 / sides;
-    float halfHeight = h / 2;
-    // top
-    beginShape();  
-    for (int i = 0; i < sides; i++) {
-        float x = cos( radians( i * angle ) ) * r1;
-        float y = sin( radians( i * angle ) ) * r1;
-        vertex( x, y, -halfHeight);
+void interactionMode(){
+  camera(width/2, height/2, (height/2.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0);
+  Cylinder cylinderThatFollows = new Cylinder(0, 0);
+  float sizeSideX = (width - BOARD_SIZE) / 2;
+  float sizeSideY = (height - BOARD_SIZE) / 2;
+  
+  pushMatrix();
+    rect(width/2-(BOARD_SIZE/2), height/2-(BOARD_SIZE/2), BOARD_SIZE, BOARD_SIZE);
+    
+    // If we are outside the board or if we want to draw over the ball
+    if(mouseX >= sizeSideX + Cylinder.r1 && mouseX <= width - sizeSideX - Cylinder.r1
+     && mouseY >= sizeSideY + Cylinder.r1 && mouseY <= height - sizeSideY - Cylinder.r1
+     // Faire pour la balle pas très dur je pense
+     ){
+      canAddCylinder = true;
+      translate(mouseX, mouseY, Cylinder.h/2);
+      cylinderThatFollows.drawCylinder();
     }
-    endShape(CLOSE);
-    // bottom
-    beginShape();
-    for (int i = 0; i < sides; i++) {
-        float x = cos( radians( i * angle ) ) * r2;
-        float y = sin( radians( i * angle ) ) * r2;
-        vertex( x, y, halfHeight);
+    else {
+      canAddCylinder = false;
     }
-    endShape(CLOSE);
-    // draw body
-    beginShape(TRIANGLE_STRIP);
-    for (int i = 0; i < sides + 1; i++) {
-        float x1 = cos( radians( i * angle ) ) * r1;
-        float y1 = sin( radians( i * angle ) ) * r1;
-        float x2 = cos( radians( i * angle ) ) * r2;
-        float y2 = sin( radians( i * angle ) ) * r2;
-        vertex( x1, y1, -halfHeight);
-        vertex( x2, y2, halfHeight);
-    }
-    endShape(CLOSE);
+  popMatrix();
+  
+  // Draw all the cylinders on the board
+  for(Cylinder cylinder: cylinders){
+    cylinder.display2D();
+  }
+}
+
+void drawCylinders(boolean is3D) {
+  for(Cylinder cylinder: cylinders) {
+    if(is3D)
+      cylinder.display3D();
+    else
+      cylinder.display2D();
+  }
 }

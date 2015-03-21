@@ -1,25 +1,26 @@
 class Mover {
-  PVector location;
-  PVector velocity;
-  PVector gravity;
-  PVector friction;
-  
-  float gravityConstant = 0.15,
-    frictionMagnitude,
-    mu = 0.02,
-    normalForce = 1,
-    elasticity = 0.7;
+  private final float GRAVITY_CONSTANT = 0.15;
+  private final float BOUNCE_CONSTANT = 0.8;
+
+
+  private PVector location, velocity, gravity, friction;
+  private float frictionMagnitude, mu, normalForce, elasticity;
   
   Mover() {
     location = new PVector(0, 0, 0);
     velocity = new PVector(0, 0, 0);
     gravity = new PVector(0, 0, 0);
     friction = new PVector(0, 0, 0);
+    
+    frictionMagnitude = 0;
+    mu = 0.02;
+    normalForce = 1;
+    elasticity = 0.7;
   }
   
   void update() {
-    gravity.x = sin(rotZ) * gravityConstant;
-    gravity.z = -sin(rotX) * gravityConstant;
+    gravity.x = sin(rotZ) * GRAVITY_CONSTANT;
+    gravity.z = -sin(rotX) * GRAVITY_CONSTANT;
 
     frictionMagnitude = normalForce * mu;
     friction = velocity.get();
@@ -32,35 +33,55 @@ class Mover {
     location.add(velocity);
   }  
 
-  void display() {
-    pushMatrix();
-      translate(width/2, height/2, 0);
-      rotateZ(rotZ);
-      rotateX(rotX);
-      box(boardX, boardThickness, boardY);
+  void displayBall3D() {
       pushMatrix();
-        translate(location.x, -boardThickness/2-radius, location.z);
-        sphere(radius);
-      popMatrix();
-    popMatrix();
+        translate(location.x, -BOARD_THICKNESS/2-BALL_RADIUS, location.z);
+        sphere(BALL_RADIUS);
+      popMatrix();      
+  }
+  
+  void displayBall2D() {
+     pushMatrix();
+      translate(location.x + width/2, location.z + height/2, BALL_RADIUS);
+      sphere(BALL_RADIUS);
+     popMatrix(); 
   }
 
   void checkEdges() {
-    if (location.x + radius > boardX/2) {
+    if (location.x + BALL_RADIUS > BOARD_SIZE/2) {
       velocity.x = -velocity.x * elasticity;
-      location.x = boardX/2 - radius;
+      location.x = BOARD_SIZE/2 - BALL_RADIUS;
     }
-    else if (location.x - radius < -boardX/2) {
+    else if (location.x - BALL_RADIUS < -BOARD_SIZE/2) {
       velocity.x = -velocity.x * elasticity;
-      location.x = -boardX/2 + radius;
+      location.x = -BOARD_SIZE/2 + BALL_RADIUS;
     }
-    if (location.z + radius > boardY/2) {
+    if (location.z + BALL_RADIUS > BOARD_SIZE/2) {
       velocity.z = -velocity.z * elasticity;
-      location.z = boardY/2 - radius;
+      location.z = BOARD_SIZE/2 - BALL_RADIUS;
     }
-    else if (location.z - radius < -boardY/2) {
+    else if (location.z - BALL_RADIUS < -BOARD_SIZE/2) {
       velocity.z = -velocity.z * elasticity;
-      location.z = -boardY/2 + radius;
+      location.z = -BOARD_SIZE/2 + BALL_RADIUS;
     }
+  }
+  
+  void checkCylinderCollision(){
+    for (Cylinder c : cylinders) {
+      PVector cL = new PVector(c.location.x - width/2, -(BOARD_THICKNESS/2 + Cylinder.h/2), c.location.z - height/2);      
+      if (Math.abs(cL.dist(location)) <= BALL_RADIUS + Cylinder.r1) {
+        PVector n = new PVector(cL.x, cL.y, cL.z);
+        n.sub(location);       
+        n.normalize();
+        location.x = cL.x - n.x*(BALL_RADIUS + Cylinder.r1);
+        location.z = cL.z - n.z*(BALL_RADIUS + Cylinder.r1);
+        float numb = velocity.mag();
+        numb *= Math.cos(PVector.angleBetween(velocity, n));
+        numb *= 2;
+        n.mult(numb);
+        velocity.sub(n);
+        velocity.mult(BOUNCE_CONSTANT);
+    }
+   }
   }
 }
