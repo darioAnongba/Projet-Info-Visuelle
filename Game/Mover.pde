@@ -65,5 +65,19 @@ class Mover {
   }
   
   void checkCylinderCollision(){
+      for(Cylinder c: cylinders) {
+        float cX = c.location.x - width/2;
+        float cZ = c.location.z - height/2;
+        if(Cylinder.r1 + BALL_RADIUS >= sqrt(pow(location.x - cX, 2) + pow(location.z - cZ, 2)) ) {
+          PVector n = new PVector(location.x - cX, 0, location.z - cZ);
+          n.normalize();
+          location.x = cX + n.x * (BALL_RADIUS + Cylinder.r1);
+          location.z = cZ + n.z * (BALL_RADIUS + Cylinder.r1);
+          float scal = velocity.dot(n) * 2;
+          n.mult(scal);
+          velocity.sub(n);
+          velocity.mult(0.8);
+        }
+      }
   }
 }

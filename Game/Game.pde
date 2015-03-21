@@ -46,8 +46,9 @@ void draw() {
     
     ball.update();
     ball.checkEdges();
+    ball.checkCylinderCollision();
     ball.displayBall3D();
-    
+   
     drawCylinders(true);
   }
 }
@@ -102,11 +103,13 @@ void interactionMode(){
   
   pushMatrix();
     rect(width/2-(BOARD_SIZE/2), height/2-(BOARD_SIZE/2), BOARD_SIZE, BOARD_SIZE);
-    
+    float positionBallX = ball.location.x + width/2;
+    float positionBallZ = ball.location.z + height/2;
     // If we are outside the board or if we want to draw over the ball
     if(mouseX >= sizeSideX + Cylinder.r1 && mouseX <= width - sizeSideX - Cylinder.r1
      && mouseY >= sizeSideY + Cylinder.r1 && mouseY <= height - sizeSideY - Cylinder.r1
-     // Faire pour la balle pas très dur je pense
+     && BALL_RADIUS + Cylinder.r1 <= sqrt(pow(mouseX-positionBallX, 2) + pow(mouseY-positionBallZ, 2))
+     && canAddCylinder()
      ){
       canAddCylinder = true;
       translate(mouseX, mouseY, Cylinder.h/2);
@@ -130,4 +133,12 @@ void drawCylinders(boolean is3D) {
     else
       cylinder.display2D();
   }
+}
+
+boolean canAddCylinder(){
+  boolean toReturn = true;
+  for(Cylinder c: cylinders){
+      toReturn &= 2*Cylinder.r1 <= sqrt(pow(mouseX - c.location.x, 2) + pow(mouseY - c.location.z, 2));
+  }
+  return toReturn;
 }
