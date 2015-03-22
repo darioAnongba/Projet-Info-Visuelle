@@ -17,7 +17,7 @@ ArrayList<Cylinder> cylinders;
 
 void setup() {
   size(1000, 800, P3D);
-  frameRate(200);
+  frameRate(100);
 
   rotX = 0;
   rotY = 0;
