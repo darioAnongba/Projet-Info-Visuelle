@@ -1,5 +1,8 @@
 class Mover {
   private final float GRAVITY_CONSTANT = 0.15;
+  private final float BOUNCE_FACTOR = 0.8;
+  private final float ELASTICITY = 0.7;
+
 
   private PVector location, velocity, gravity, friction;
   private float frictionMagnitude, mu, normalForce, elasticity;
@@ -13,7 +16,6 @@ class Mover {
     frictionMagnitude = 0;
     mu = 0.02;
     normalForce = 1;
-    elasticity = 0.7;
   }
   
   void update() {
@@ -34,6 +36,8 @@ class Mover {
   void displayBall3D() {
       pushMatrix();
         translate(location.x, -BOARD_THICKNESS/2-BALL_RADIUS, location.z);
+        fill(246, 142, 86);
+        lights();
         sphere(BALL_RADIUS);
       popMatrix();      
   }
@@ -41,25 +45,27 @@ class Mover {
   void displayBall2D() {
      pushMatrix();
       translate(location.x + width/2, location.z + height/2, BALL_RADIUS);
+      fill(246, 142, 86);
+      lights();
       sphere(BALL_RADIUS);
      popMatrix(); 
   }
 
   void checkEdges() {
     if (location.x + BALL_RADIUS > BOARD_SIZE/2) {
-      velocity.x = -velocity.x * elasticity;
+      velocity.x = -velocity.x * ELASTICITY;
       location.x = BOARD_SIZE/2 - BALL_RADIUS;
     }
     else if (location.x - BALL_RADIUS < -BOARD_SIZE/2) {
-      velocity.x = -velocity.x * elasticity;
+      velocity.x = -velocity.x * ELASTICITY;
       location.x = -BOARD_SIZE/2 + BALL_RADIUS;
     }
     if (location.z + BALL_RADIUS > BOARD_SIZE/2) {
-      velocity.z = -velocity.z * elasticity;
+      velocity.z = -velocity.z * ELASTICITY;
       location.z = BOARD_SIZE/2 - BALL_RADIUS;
     }
     else if (location.z - BALL_RADIUS < -BOARD_SIZE/2) {
-      velocity.z = -velocity.z * elasticity;
+      velocity.z = -velocity.z * ELASTICITY;
       location.z = -BOARD_SIZE/2 + BALL_RADIUS;
     }
   }
@@ -76,7 +82,7 @@ class Mover {
           float scal = velocity.dot(n) * 2;
           n.mult(scal);
           velocity.sub(n);
-          velocity.mult(0.8);
+          velocity.mult(BOUNCE_FACTOR);
         }
       }
   }

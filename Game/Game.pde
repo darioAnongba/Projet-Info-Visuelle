@@ -17,11 +17,11 @@ ArrayList<Cylinder> cylinders;
 
 void setup() {
   size(1000, 800, P3D);
-  frameRate(100);
-  
+  frameRate(200);
+
   rotX = 0;
   rotY = 0;
-  rotZ = 0; 
+  rotZ = 0;
   speed = 0.1;
   interactionMode = false;
   canAddCylinder = false;
@@ -31,8 +31,8 @@ void setup() {
 }
 
 void draw() {
-  background(255);
-  
+  background(0, 191, 243);
+
   if(interactionMode){
     interactionMode();
     ball.displayBall2D();
@@ -42,7 +42,10 @@ void draw() {
     translate(width/2, height/2, 0);
     rotateZ(rotZ);
     rotateX(rotX);
+    stroke(0);
+    fill(255, 245, 104);
     box(BOARD_SIZE, BOARD_THICKNESS, BOARD_SIZE);
+    noStroke();
     
     ball.update();
     ball.checkEdges();
@@ -102,7 +105,10 @@ void interactionMode(){
   float sizeSideY = (height - BOARD_SIZE) / 2;
   
   pushMatrix();
+    fill(255, 245, 104);
+    stroke(0);
     rect(width/2-(BOARD_SIZE/2), height/2-(BOARD_SIZE/2), BOARD_SIZE, BOARD_SIZE);
+    noStroke();
     float positionBallX = ball.location.x + width/2;
     float positionBallZ = ball.location.z + height/2;
     // If we are outside the board or if we want to draw over the ball
