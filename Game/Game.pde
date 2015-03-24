@@ -14,6 +14,7 @@ boolean interactionMode, canAddCylinder;
 Mover ball;
 Cylinder cylinder;
 ArrayList<Cylinder> cylinders;
+PGraphics dataVisualization;
 
 void setup() {
   size(1000, 800, P3D);
@@ -28,6 +29,8 @@ void setup() {
   ball = new Mover();
   cylinder = new Cylinder(0, 0);
   cylinders = new ArrayList();
+  
+  dataVisualization = createGraphics(width, height/5, P2D);
 }
 
 void draw() {
@@ -38,21 +41,28 @@ void draw() {
     ball.displayBall2D();
   }
   else {
-    camera(width/2, -height/2, (height/2.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0);
-    translate(width/2, height/2, 0);
-    rotateZ(rotZ);
-    rotateX(rotX);
-    stroke(0);
-    fill(255, 245, 104);
-    box(BOARD_SIZE, BOARD_THICKNESS, BOARD_SIZE);
-    noStroke();
+    pushMatrix();
+      camera(width/2, -height/2, (height/2.0) / tan(PI*30.0 / 180.0), width/2.0, height/2.0, 0, 0, 1, 0);
+      translate(width/2, height/2, 0);
+      rotateZ(rotZ);
+      rotateX(rotX);
+      stroke(0);
+      fill(255, 245, 104);
+      box(BOARD_SIZE, BOARD_THICKNESS, BOARD_SIZE);
+      noStroke();
+      
+      ball.update();
+      ball.checkEdges();
+      ball.checkCylinderCollision();
+      ball.displayBall3D();
+     
+      drawCylinders(true);
+    popMatrix();
     
-    ball.update();
-    ball.checkEdges();
-    ball.checkCylinderCollision();
-    ball.displayBall3D();
-   
-    drawCylinders(true);
+    pushMatrix();
+      drawDataVisualization();
+      image(dataVisualization, 0, 4.0/5.0*height);
+    popMatrix();
   }
 }
 
@@ -119,6 +129,8 @@ void interactionMode(){
      ){
       canAddCylinder = true;
       translate(mouseX, mouseY, Cylinder.h/2);
+      directionalLight(20, 20, 40, -1, 0, 1);
+      fill(220, 220, 220);
       cylinderThatFollows.drawCylinder();
     }
     else {
@@ -127,12 +139,16 @@ void interactionMode(){
   popMatrix();
   
   // Draw all the cylinders on the board
+  directionalLight(20, 20, 40, -1, 0, 1);
+  fill(220, 220, 220);
   for(Cylinder cylinder: cylinders){
     cylinder.display2D();
   }
 }
 
 void drawCylinders(boolean is3D) {
+  directionalLight(20, 20, 40, -1, 0, 1);
+  fill(220, 220, 220);
   for(Cylinder cylinder: cylinders) {
     if(is3D)
       cylinder.display3D();
@@ -147,4 +163,15 @@ boolean canAddCylinder(){
       toReturn &= 2*Cylinder.r1 <= sqrt(pow(mouseX - c.location.x, 2) + pow(mouseY - c.location.z, 2));
   }
   return toReturn;
+}
+
+void drawDataVisualization(){
+  lights();
+  dataVisualization.beginDraw();
+  dataVisualization.background(102);
+  dataVisualization.fill(240, 213, 183);
+  dataVisualization.strokeWeight(10);
+  dataVisualization.stroke(255);
+  dataVisualization.rect(0, 0, width, height/5);
+  dataVisualization.endDraw();
 }

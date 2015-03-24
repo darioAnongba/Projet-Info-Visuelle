@@ -12,9 +12,6 @@ class Cylinder{
   
   public void drawCylinder()
   {
-      directionalLight(20, 20, 40, -1, 0, 1);
-      fill(220, 220, 220);
-      
       float angle = 360 / sides;
       float halfHeight = h / 2;
       // top
@@ -44,6 +41,7 @@ class Cylinder{
           vertex( x2, y2, halfHeight);
       }
       endShape(CLOSE);
+      noFill();
   }
   
   public void display3D() {
