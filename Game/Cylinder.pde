@@ -41,7 +41,7 @@ class Cylinder{
           vertex( x2, y2, halfHeight);
       }
       endShape(CLOSE);
-      noFill();
+      //noFill();
   }
   
   public void display3D() {
