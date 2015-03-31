@@ -14,10 +14,10 @@ boolean interactionMode, canAddCylinder;
 Mover ball;
 Cylinder cylinder;
 ArrayList<Cylinder> cylinders;
-PGraphics dataVisualization;
+PGraphics dataVisualization, topView;
 
 void setup() {
-  size(1000, 800, P3D);
+  size(800, 600, P3D);
   frameRate(100);
 
   rotX = 0;
@@ -31,6 +31,7 @@ void setup() {
   cylinders = new ArrayList();
   
   dataVisualization = createGraphics(width, height/5, P2D);
+  topView = createGraphics(width/7, height/5, P2D);
 }
 
 void draw() {
@@ -62,6 +63,11 @@ void draw() {
     pushMatrix();
       drawDataVisualization();
       image(dataVisualization, 0, 4.0/5.0*height);
+    popMatrix();
+    
+    pushMatrix();
+      drawTopView();
+      image(topView, 0, 4.0/5.0*height);
     popMatrix();
   }
 }
@@ -170,8 +176,27 @@ void drawDataVisualization(){
   dataVisualization.beginDraw();
   dataVisualization.background(102);
   dataVisualization.fill(240, 213, 183);
-  dataVisualization.strokeWeight(10);
+  //dataVisualization.strokeWeight(1);
   dataVisualization.stroke(255);
   dataVisualization.rect(0, 0, width, height/5);
   dataVisualization.endDraw();
+}
+
+void drawTopView(){
+  lights();
+  topView.beginDraw();
+  //topView.background(12);
+  topView.fill(240, 213, 220);
+  //topView.strokeWeight(1);
+  topView.stroke(255);
+  topView.rect(10, 10, BOARD_SIZE/7, BOARD_SIZE/7);
+  topView.fill(246, 142, 86);
+  float positionBallX = ball.location.x + width/2;
+  float positionBallZ = ball.location.z + height/2;
+  topView.ellipse(10/3.5 + (positionBallX) / 7.0, 15 + 10/3.5 + (positionBallZ) / 7.0, BALL_RADIUS/3.5, BALL_RADIUS/3.5); //tailles a voir
+  topView.fill(220, 220, 220);
+  for (Cylinder c : cylinders) {
+    topView.ellipse(10/3.5 + (c.location.x) / 7.0, 15 + 10/3.5 + c.location.z / 7.0, Cylinder.r1 / 3.5, Cylinder.r2 / 3.5); //tailles à voir
+  }
+  topView.endDraw();
 }
