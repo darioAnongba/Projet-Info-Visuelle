@@ -53,18 +53,26 @@ class Mover {
 
   void checkEdges() {
     if (location.x + BALL_RADIUS > BOARD_SIZE/2) {
+      lastScore = score;
+      score = score - sqrt(pow(velocity.x, 2) + pow(velocity.z, 2));
       velocity.x = -velocity.x * ELASTICITY;
       location.x = BOARD_SIZE/2 - BALL_RADIUS;
     }
     else if (location.x - BALL_RADIUS < -BOARD_SIZE/2) {
+      lastScore = score;
+      score = score - sqrt(pow(velocity.x, 2) + pow(velocity.z, 2));
       velocity.x = -velocity.x * ELASTICITY;
       location.x = -BOARD_SIZE/2 + BALL_RADIUS;
     }
     if (location.z + BALL_RADIUS > BOARD_SIZE/2) {
+      lastScore = score;
+      score = score - sqrt(pow(velocity.x, 2) + pow(velocity.z, 2));
       velocity.z = -velocity.z * ELASTICITY;
       location.z = BOARD_SIZE/2 - BALL_RADIUS;
     }
     else if (location.z - BALL_RADIUS < -BOARD_SIZE/2) {
+      lastScore = score;
+      score = score - sqrt(pow(velocity.x, 2) + pow(velocity.z, 2));
       velocity.z = -velocity.z * ELASTICITY;
       location.z = -BOARD_SIZE/2 + BALL_RADIUS;
     }
@@ -75,6 +83,8 @@ class Mover {
         float cX = c.location.x - width/2;
         float cZ = c.location.z - height/2;
         if(Cylinder.r1 + BALL_RADIUS >= sqrt(pow(location.x - cX, 2) + pow(location.z - cZ, 2)) ) {
+          lastScore = score;
+          score = score + sqrt(pow(velocity.x, 2) + pow(velocity.z, 2));
           PVector n = new PVector(location.x - cX, 0, location.z - cZ);
           n.normalize();
           location.x = cX + n.x * (BALL_RADIUS + Cylinder.r1);

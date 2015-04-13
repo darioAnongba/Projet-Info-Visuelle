@@ -4,17 +4,23 @@ final int BOARD_SIZE = 700;
 float rotX, rotY, rotZ;
 float diffX, diffY;
 float speed;
+float score, lastScore;
+double time;
 
 // Ball values
 final int BALL_RADIUS = 20;
 
 // Global values
 final int DEPTH = 2000;
+final float miniRectSize = 10.0;
 boolean interactionMode, canAddCylinder;
 Mover ball;
 Cylinder cylinder;
 ArrayList<Cylinder> cylinders;
-PGraphics dataVisualization, topView;
+ArrayList<Float> scores;
+PGraphics dataVisualization, topView, scoreboard, barChart;
+HScrollbar hs;
+PShape tree;
 
 void setup() {
   size(800, 600, P3D);
@@ -29,14 +35,24 @@ void setup() {
   ball = new Mover();
   cylinder = new Cylinder(0, 0);
   cylinders = new ArrayList();
+  scores = new ArrayList();
+  score = 0.0;
+  lastScore = 0.0;
+  time = 0.0;
   
   dataVisualization = createGraphics(width, height/5, P2D);
   topView = createGraphics(width/7, height/5, P2D);
+  scoreboard = createGraphics(width/7, height/5, P2D);
+  barChart = createGraphics(5*width/7, height/5, P2D);
+  hs = new HScrollbar(5*width/7/2 - 40, 4*height/5+100, 550, 13);
+  
+  tree = loadShape("simpleTree.obj");
+  tree.scale(40);
 }
 
 void draw() {
   background(0, 191, 243);
-
+  time += 0.001;
   if(interactionMode){
     interactionMode();
     ball.displayBall2D();
@@ -68,6 +84,21 @@ void draw() {
     pushMatrix();
       drawTopView();
       image(topView, 0, 4.0/5.0*height);
+    popMatrix();
+    
+    pushMatrix();
+      drawScoreboard();
+      image(scoreboard, BOARD_SIZE/7.0 + 20, 4.0/5.0*height);
+    popMatrix();
+    
+    pushMatrix();
+      drawBarChart();
+      image(barChart, 2*BOARD_SIZE/7.0 + 20 + 20, 4.0/5.0*height + 5);
+    popMatrix();
+    
+    pushMatrix();
+      hs.update();
+      hs.display();
     popMatrix();
   }
 }
@@ -136,8 +167,10 @@ void interactionMode(){
       canAddCylinder = true;
       translate(mouseX, mouseY, Cylinder.h/2);
       directionalLight(20, 20, 40, -1, 0, 1);
-      fill(220, 220, 220);
-      cylinderThatFollows.drawCylinder();
+      //fill(220, 220, 220);
+      rotateX(PI/2);
+      shape(tree);
+      //cylinderThatFollows.drawCylinder();
     }
     else {
       canAddCylinder = false;
@@ -146,7 +179,7 @@ void interactionMode(){
   
   // Draw all the cylinders on the board
   directionalLight(20, 20, 40, -1, 0, 1);
-  fill(220, 220, 220);
+  fill(62, 168, 50);
   for(Cylinder cylinder: cylinders){
     cylinder.display2D();
   }
@@ -186,17 +219,48 @@ void drawTopView(){
   lights();
   topView.beginDraw();
   //topView.background(12);
-  topView.fill(240, 213, 220);
+  topView.fill(255, 245, 104);
   //topView.strokeWeight(1);
   topView.stroke(255);
   topView.rect(10, 10, BOARD_SIZE/7, BOARD_SIZE/7);
   topView.fill(246, 142, 86);
   float positionBallX = ball.location.x + width/2;
   float positionBallZ = ball.location.z + height/2;
+  topView.noStroke();
   topView.ellipse(10/3.5 + (positionBallX) / 7.0, 15 + 10/3.5 + (positionBallZ) / 7.0, BALL_RADIUS/3.5, BALL_RADIUS/3.5); //tailles a voir
   topView.fill(220, 220, 220);
   for (Cylinder c : cylinders) {
     topView.ellipse(10/3.5 + (c.location.x) / 7.0, 15 + 10/3.5 + c.location.z / 7.0, Cylinder.r1 / 3.5, Cylinder.r2 / 3.5); //tailles à voir
   }
   topView.endDraw();
+}
+
+void drawScoreboard(){
+  lights();
+  scoreboard.beginDraw();
+  scoreboard.stroke(255);
+  String s = "Total score:\n" + round(score*1000.0)/1000.0 + "\nVelocity:\n" + round(sqrt(pow(ball.velocity.x, 2) + pow(ball.velocity.z, 2))*1000.0)/1000.0 + "\nLast score:\n" + round(lastScore*1000.0)/1000.0;
+  scoreboard.fill(240, 213, 183);
+  scoreboard.rect(10, 10, BOARD_SIZE/7, BOARD_SIZE/7);
+  scoreboard.fill(50);
+  scoreboard.text(s, 15, 15, BOARD_SIZE/7 - 15, BOARD_SIZE/7 - 15);
+  scoreboard.endDraw();
+}
+
+void drawBarChart(){
+  lights();
+  barChart.beginDraw();
+  barChart.stroke(240, 213, 183);
+  barChart.fill(200, 213, 183);
+  barChart.rect(0, 0, 5*width/7, height/5/2 + 30);
+  barChart.fill(240, 180, 183);
+  if (time*1000 % 1000 < 0.1 ) {
+    scores.add(score);
+  }
+  for (int i = 0; i < scores.size(); i++) {
+    for (int j = 0; j < max(0, scores.get(i)) / 10; j++) {
+      barChart.rect(i*miniRectSize+10, height/5/2+30-(j+1)*miniRectSize, miniRectSize*hs.getPos(), miniRectSize);
+    }
+  }
+  barChart.endDraw();
 }

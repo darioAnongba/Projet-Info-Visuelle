@@ -46,16 +46,21 @@ class Cylinder{
   
   public void display3D() {
     pushMatrix();
-      translate(location.x - width/2, -(BOARD_THICKNESS/2 + Cylinder.h/2), location.z - height/2);
-      rotateX(PI/2);
-      drawCylinder(); 
+      //translate(location.x - width/2, -(BOARD_THICKNESS/2 + Cylinder.h/2), location.z - height/2);
+      translate(location.x - width/2, -(BOARD_THICKNESS/2), location.z - height/2);
+      rotateX(PI);
+      shape(tree);
+      //rotateX(PI/2);
+      //drawCylinder(); 
     popMatrix();
   }
   
   public void display2D() {
     pushMatrix();
       translate(location.x,location.z, h/2);
-      drawCylinder(); 
+      rotateX(PI/2);
+      shape(tree);
+      //drawCylinder(); 
     popMatrix();
   }
 }
