@@ -1,7 +1,7 @@
 class Cylinder{
   private final float sides = 50;
-  public static final float r1 = 40;
-  public static final float r2 = 40;
+  public static final float r1 = 25;
+  public static final float r2 = 25;
   public static final float h = 60;
   
   PVector location;

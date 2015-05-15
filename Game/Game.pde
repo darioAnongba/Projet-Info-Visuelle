@@ -46,7 +46,7 @@ void setup() {
   barChart = createGraphics(5*width/7, height/5, P2D);
   hs = new HScrollbar(5*width/7/2 - 40, 4*height/5+100, 550, 13);
   
-  tree = loadShape("simpleTree.obj");
+  tree = loadShape("test.obj");
   tree.scale(40);
 }
 
