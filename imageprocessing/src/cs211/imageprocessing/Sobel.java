@@ -14,7 +14,7 @@ public final class Sobel {
     public PImage img() {
         float[][] hKernel = { { 0, 1, 0 }, { 0, 0, 0 }, { 0, -1, 0 } };
         float[][] vKernel = { { 0, 0, 0 }, { 1, 0, -1 }, { 0, 0, 0 } };
-        PImage result = parent.createImage(img.width, img.height, parent.ALPHA);
+        PImage result = parent.createImage(img.width, img.height, PConstants.ALPHA);
         // clear the image
         for (int i = 0; i < img.width * img.height; i++) {
             result.pixels[i] = parent.color(0);
@@ -48,7 +48,7 @@ public final class Sobel {
 
                 int sum_v = (int)(top + bottom + left + right + tL + tR + bL + bR + curr);
                 
-                int sum = (int)parent.sqrt(parent.pow(sum_h, 2) + parent.pow(sum_v, 2));
+                int sum = (int)Math.sqrt(Math.pow(sum_h, 2) + Math.pow(sum_v, 2));
                 
                 buffer[(y * img.width + x)] = sum;
                 

@@ -5,46 +5,37 @@ import processing.core.*;
 public class ImageProcessing extends PApplet {
 
     private static final long serialVersionUID = 1L;
-
+    
+    public static final int WIDTH    = 560;
+    public static final int HEIGHT   = 420;
+    
     PImage img;
     
+    Filters filters;
     Sobel sobel;
     Hough hough;
     
     public void setup() {
-        size(800, 600);
-        img = loadImage("board1.jpg");
-        sobel = new Sobel(this, myHue(img));
-        hough = new Hough(this, sobel.img());
-                
+        size(WIDTH * 3, HEIGHT);
+        
+        img = loadImage("board4.jpg");
+        img.resize(WIDTH, HEIGHT);
+        
+        filters = new Filters(this, img);
+        sobel = new Sobel(this, filters.getFilteredImg());
+        hough = new Hough(this, sobel.img(), 200, 4);
+               
         noLoop();
     }
     
     public void draw() {
-        background(img);
-        image(hough.img(), 0, 0);
+        background(255);
+        image(img, 0, 0);
+        hough.getIntersections();
+        image(hough.getAccImg(), WIDTH, 0, WIDTH, HEIGHT);
+        image(sobel.img(), WIDTH * 2, 0);
     }
-    
-    public PImage myHue(PImage img) {
-        PImage result = createImage(img.width, img.height, ALPHA);
         
-        for(int i = 0; i < img.width * img.height; i++) {
-            int p = img.pixels[i];
-            float h = hue(p);
-            float b = brightness(p);
-            float s = saturation(p);
-            
-            if(h <= 135 && h >= 110 && b > 20 && b < 220 && s > 30) {
-                result.pixels[i] = color(255);
-            }
-            else {
-                result.pixels[i] = 0;
-            }
-        }
-        
-        return result;
-    }
-    
     public static void main(String[] args) {
         PApplet.main(new String[] { "--present", "ImageProcessing" });
     }
