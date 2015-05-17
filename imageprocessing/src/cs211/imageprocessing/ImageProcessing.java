@@ -18,7 +18,7 @@ public class ImageProcessing extends PApplet {
     public void setup() {
         size(WIDTH * 3, HEIGHT);
         
-        img = loadImage("board4.jpg");
+        img = loadImage("board1.jpg");
         img.resize(WIDTH, HEIGHT);
         
         filters = new Filters(this, img);

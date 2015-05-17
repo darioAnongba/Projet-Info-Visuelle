@@ -44,12 +44,31 @@ public final class Filters {
 
     public void blur() {
         float[][] kernel = { { 9, 12, 9 }, { 12, 15, 12 }, { 9, 12, 9 } };
-
-        float weight = 99;
+        int[][] tab = {{-1, -1}, {-1, 0}, {-1, 1}, {0, -1}, {0, 0}, {0, 1}, {1, -1}, {1, 0}, {1, 1}};
+        
+        float weight = 99f;
         
         PImage blurImg = parent.createImage(img.width, img.height, PConstants.ALPHA);
         
-        //TODO
+        for (int x = 0; x < img.width; x++) {
+        	for (int y = 0; y < img.height; y++) {
+        		// if borders, just copy/paste from img
+        		if (x == 0 || x == img.width - 1 || y == 0 || y == img.height - 1) {
+        			blurImg.pixels[y * img.width + x] = img.pixels[y * img.width + x];
+        		}
+        		else {
+        			int sum = 0;
+            		for (int[] tuple : tab) {
+            			sum += kernel[1+tuple[0]][1+tuple[1]] * getPix(x + tuple[0], y + tuple[1]);
+            		}
+            		blurImg.pixels[y * img.width + x] = Math.round(sum / weight);
+        		}
+        	}
+        }
+    }
+    
+    private int getPix(int i, int j) {
+    	return img.pixels[i + j*img.width];
     }
 
     public PImage getBlurImg() {
