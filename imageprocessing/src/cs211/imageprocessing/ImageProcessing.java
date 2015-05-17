@@ -6,8 +6,8 @@ public class ImageProcessing extends PApplet {
 
     private static final long serialVersionUID = 1L;
     
-    public static final int WIDTH    = 560;
-    public static final int HEIGHT   = 420;
+    public static final int WIDTH    = 480;
+    public static final int HEIGHT   = 360;
     
     PImage img;
     
@@ -22,8 +22,8 @@ public class ImageProcessing extends PApplet {
         img.resize(WIDTH, HEIGHT);
         
         filters = new Filters(this, img);
-        sobel = new Sobel(this, filters.getFilteredImg());
-        hough = new Hough(this, sobel.img(), 200, 4);
+        sobel = new Sobel(this, filters.getIntensityImg());
+        hough = new Hough(this, sobel.img(), 200);
                
         noLoop();
     }

@@ -9,15 +9,13 @@ public final class Hough {
 
     private PImage edgeImg;
     private int minVotes;
-    private int nFirst;
     private PImage accImg;
     private PApplet parent;
     
-    Hough(PApplet p, PImage img, int minVotes, int nFirst) {
+    Hough(PApplet p, PImage img, int minVotes) {
         parent = p;
         edgeImg = img;
         this.minVotes = minVotes;
-        this.nFirst = nFirst;
         
         //accImg is an "Empty" image before calling hough
         accImg = parent.createImage(0, 0, 0);
@@ -121,11 +119,10 @@ public final class Hough {
 
         Collections.sort(bestCandidates, new HoughComparator(accumulator));
         
-     // Plotting lines with more than 200 votes on the image.
         ArrayList<PVector> vectorsLines = new ArrayList<PVector>();
         
-        for (int atIndex = 0; atIndex < nFirst && atIndex < bestCandidates.size() ;atIndex++) {
-            int idx = bestCandidates.get(atIndex);
+        for (int i = 0; i < 4 && i < bestCandidates.size() ; i++) {
+            int idx = bestCandidates.get(i);
 
                 // first, compute back the (r, phi) polar coordinates:
                 int accPhi = (int) (idx / (rDim + 2)) - 1;
