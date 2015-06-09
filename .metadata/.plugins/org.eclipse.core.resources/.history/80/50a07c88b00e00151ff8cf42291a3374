@@ -1,0 +1,280 @@
+package cs211.tangibleGame;
+import java.util.ArrayList;
+
+import processing.core.*;
+import processing.event.MouseEvent;
+
+public class TangibleGame extends PApplet {
+
+	private static final long serialVersionUID = 1L;
+	
+	// Board values
+	static final int BOARD_THICKNESS = 20;
+	static final int BOARD_SIZE = 700;
+	static float rotX, rotY, rotZ;
+	float diffX, diffY;
+	float speed;
+	static float score, lastScore;
+	double time;
+
+	// Ball values
+	static final int BALL_RADIUS = 20;
+
+	// Global values
+	final int DEPTH = 2000;
+	final float miniRectSize = 10.0f;
+	boolean interactionMode, canAddCylinder;
+	Mover ball;
+	Cylinder cylinder;
+	static ArrayList<Cylinder> cylinders;
+	ArrayList<Float> scores;
+	PGraphics dataVisualization, topView, scoreboard, barChart;
+	HScrollbar hs;
+	static PShape olaf;
+	
+	public void setup() {
+		  size(800, 600, P3D);
+		  frameRate(100);
+
+		  rotX = 0;
+		  rotY = 0;
+		  rotZ = 0;
+		  speed = 0.1f;
+		  interactionMode = false;
+		  canAddCylinder = false;
+		  ball = new Mover(this);
+		  cylinder = new Cylinder(0, 0, this);
+		  cylinders = new ArrayList<Cylinder>();
+		  scores = new ArrayList<Float>();
+		  score = 0.0f;
+		  lastScore = 0.0f;
+		  time = 0.0;
+		  
+		  dataVisualization = createGraphics(width, height/5, P2D);
+		  topView = createGraphics(width/7, height/5, P2D);
+		  scoreboard = createGraphics(width/7, height/5, P2D);
+		  barChart = createGraphics(5*width/7, height/5, P2D);
+		  hs = new HScrollbar(5*width/7/2 - 40, 4*height/5+100, 550, 13, this);
+		  
+		  olaf = loadShape("olaf.obj");
+		  olaf.scale(50);
+		}
+
+		public void draw() {
+		  background(0, 191, 243);
+		  time += 0.001;
+		  if(interactionMode){
+		    interactionMode();
+		    ball.displayBall2D();
+		  }
+		  else {
+		    pushMatrix();
+		      camera(width/2.0f, -height/2.0f, (height/2.0f) / (float)Math.tan(PI*30.0f / 180.0f), width/2.0f, height/2.0f, 0f, 0f, 1.0f, 0f);
+		      translate(width/2, height/2, 0);
+		      rotateZ(rotZ);
+		      rotateX(rotX);
+		      stroke(0);
+		      fill(255, 245, 104);
+		      box(BOARD_SIZE, BOARD_THICKNESS, BOARD_SIZE);
+		      noStroke();
+		      
+		      ball.update();
+		      ball.checkEdges();
+		      ball.checkCylinderCollision();
+		      ball.displayBall3D();
+		     
+		      drawCylinders(true);
+		    popMatrix();
+		    
+		    pushMatrix();
+		      drawDataVisualization();
+		      image(dataVisualization, 0, 4.0f/5.0f*height);
+		    popMatrix();
+		    
+		    pushMatrix();
+		      drawTopView();
+		      image(topView, 0, 4.0f/5.0f*height);
+		    popMatrix();
+		    
+		    pushMatrix();
+		      drawScoreboard();
+		      image(scoreboard, BOARD_SIZE/7.0f + 20, 4.0f/5.0f*height);
+		    popMatrix();
+		    
+		    pushMatrix();
+		      drawBarChart();
+		      image(barChart, 2*BOARD_SIZE/7.0f + 20 + 20, 4.0f/5.0f*height + 5);
+		    popMatrix();
+		    
+		    pushMatrix();
+		      hs.update();
+		      hs.display();
+		    popMatrix();
+		  }
+		}
+
+		public void mouseDragged() {
+		  diffX += map(mouseX, 0, width, -PI/3, PI/3) - map(pmouseX, 0, width, -PI/3, PI/3);
+		  diffY += map(mouseY, 0, height, -PI/3, PI/3) - map(pmouseY, 0, height, -PI/3, PI/3);
+		  
+		  rotZ = clamp(diffX, -PI/3, PI/3);
+		  rotX = clamp(diffY, -PI/3, PI/3);
+		}
+
+		private float clamp(float value, float min, float max) {
+		  if (value > max) return max;
+		  else if (value < min) return min;
+		  else return value;
+		}
+
+		public void mouseWheel(MouseEvent event) {
+		  float e = event.getCount();
+		  speed = clamp(speed + e/100, 0.2f, 1.5f);
+		}
+
+		public void keyPressed(){
+		  if (keyCode == LEFT)
+		    rotY += speed;
+		  else if (keyCode == RIGHT)
+		    rotY -= speed;
+		  else if (keyCode == SHIFT)
+		    interactionMode = true;
+		  else if (keyCode == UP){
+		    System.out.println();
+		  }
+		}
+
+		public void keyReleased(){
+		  if(keyCode == SHIFT)
+		    interactionMode = false;
+		}
+
+		public void mouseClicked(){
+		  if(interactionMode && canAddCylinder){
+		    cylinders.add(new Cylinder(mouseX, mouseY, this));
+		  }
+		}
+
+		void interactionMode(){
+		  camera(width/2.0f, height/2.0f, (height/2.0f) / (float)Math.tan(PI*30.0f / 180.0f), width/2.0f, height/2.0f, 0f, 0f, 1.0f, 0f);
+		  float sizeSideX = (width - BOARD_SIZE) / 2;
+		  float sizeSideY = (height - BOARD_SIZE) / 2;
+		  
+		  pushMatrix();
+		    fill(255, 245, 104);
+		    stroke(0);
+		    rect(width/2-(BOARD_SIZE/2), height/2-(BOARD_SIZE/2), BOARD_SIZE, BOARD_SIZE);
+		    noStroke();
+		    float positionBallX = ball.location.x + width/2;
+		    float positionBallZ = ball.location.z + height/2;
+		    // If we are outside the board or if we want to draw over the ball
+		    if(mouseX >= sizeSideX + Cylinder.r1 && mouseX <= width - sizeSideX - Cylinder.r1
+		     && mouseY >= sizeSideY + Cylinder.r1 && mouseY <= height - sizeSideY - Cylinder.r1
+		     && BALL_RADIUS + Cylinder.r1 <= sqrt(pow(mouseX-positionBallX, 2) + pow(mouseY-positionBallZ, 2))
+		     && canAddCylinder()
+		     ){
+		      canAddCylinder = true;
+		      translate(mouseX, mouseY, Cylinder.h/2);
+		      directionalLight(20, 20, 40, -1, 0, 1);
+		      //fill(220, 220, 220);
+		      rotateX(PI/2);
+		      shape(olaf);
+		    }
+		    else {
+		      canAddCylinder = false;
+		    }
+		  popMatrix();
+		  
+		  // Draw all the cylinders on the board
+		  directionalLight(20, 20, 40, -1, 0, 1);
+		  fill(62, 168, 50);
+		  for(Cylinder cylinder: cylinders){
+		    cylinder.display2D();
+		  }
+		}
+
+		void drawCylinders(boolean is3D) {
+		  directionalLight(20, 20, 40, -1, 0, 1);
+		  fill(220, 220, 220);
+		  for(Cylinder cylinder: cylinders) {
+		    if(is3D)
+		      cylinder.display3D();
+		    else
+		      cylinder.display2D();
+		  }
+		}
+
+		boolean canAddCylinder(){
+		  boolean toReturn = true;
+		  for(Cylinder c: cylinders){
+		      toReturn &= 2*Cylinder.r1 <= sqrt(pow(mouseX - c.location.x, 2) + pow(mouseY - c.location.z, 2));
+		  }
+		  return toReturn;
+		}
+
+		void drawDataVisualization(){
+		  lights();
+		  dataVisualization.beginDraw();
+		  dataVisualization.background(102);
+		  dataVisualization.fill(240, 213, 183);
+		  //dataVisualization.strokeWeight(1);
+		  dataVisualization.stroke(255);
+		  dataVisualization.rect(0, 0, width, height/5);
+		  dataVisualization.endDraw();
+		}
+
+		public void drawTopView(){
+		  lights();
+		  topView.beginDraw();
+		  //topView.background(12);
+		  topView.fill(255, 245, 104);
+		  //topView.strokeWeight(1);
+		  topView.stroke(255);
+		  topView.rect(10, 10, BOARD_SIZE/7, BOARD_SIZE/7);
+		  topView.fill(246, 142, 86);
+		  float positionBallX = ball.location.x + width/2;
+		  float positionBallZ = ball.location.z + height/2;
+		  topView.noStroke();
+		  topView.ellipse(10.0f/3.5f + (positionBallX) / 7.0f, 15.0f + 10.0f/3.5f + (positionBallZ) / 7.0f, BALL_RADIUS/3.5f, BALL_RADIUS/3.5f); //tailles a voir
+		  topView.fill(220, 220, 220);
+		  for (Cylinder c : cylinders) {
+		    topView.ellipse(10.0f/3.5f + (c.location.x) / 7.0f, 15.0f + 10.0f/3.5f + c.location.z / 7.0f, Cylinder.r1 / 3.5f, Cylinder.r2 / 3.5f); //tailles a  voir
+		  }
+		  topView.endDraw();
+		}
+
+		public void drawScoreboard(){
+		  lights();
+		  scoreboard.beginDraw();
+		  scoreboard.stroke(255);
+		  String s = "Total score:\n" + Math.round(score*1000.0)/1000.0 + "\nVelocity:\n" + Math.round(sqrt(pow(ball.velocity.x, 2) + pow(ball.velocity.z, 2))*1000.0)/1000.0 + "\nLast score:\n" + Math.round(lastScore*1000.0)/1000.0;
+		  scoreboard.fill(240, 213, 183);
+		  scoreboard.rect(10, 10, BOARD_SIZE/7, BOARD_SIZE/7);
+		  scoreboard.fill(50);
+		  scoreboard.text(s, 15, 15, BOARD_SIZE/7 - 15, BOARD_SIZE/7 - 15);
+		  scoreboard.endDraw();
+		}
+
+		public void drawBarChart(){
+		  lights();
+		  barChart.beginDraw();
+		  barChart.stroke(240, 213, 183);
+		  barChart.fill(200, 213, 183);
+		  barChart.rect(0, 0, 5*width/7, height/5/2 + 30);
+		  barChart.fill(240, 180, 183);
+		  if (time*1000 % 1000 < 0.1 ) {
+		    scores.add(score);
+		  }
+		  for (int i = 0; i < scores.size(); i++) {
+		    for (int j = 0; j < max(0, scores.get(i)) / 10; j++) {
+		      barChart.rect(i*miniRectSize+10, height/5/2+30-(j+1)*miniRectSize, miniRectSize*hs.getPos(), miniRectSize);
+		    }
+		  }
+		  barChart.endDraw();
+		}
+		
+	  public static void main(String args[]) {
+	    PApplet.main(new String[] { "--present", "TangibleGame" });
+	  }
+
+}

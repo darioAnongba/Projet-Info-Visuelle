@@ -1,0 +1,111 @@
+package cs211.tangibleGame;
+import processing.core.*;
+
+class Mover {
+  private final float GRAVITY_CONSTANT = 0.15f;
+  private final float BOUNCE_FACTOR = 0.8f;
+  private final float ELASTICITY = 0.7f;
+
+
+  private PVector location, velocity, gravity, friction;
+  private float frictionMagnitude, mu, normalForce;
+  
+  PApplet parent;
+  
+  Mover(PApplet p) {
+    location = new PVector(0, 0, 0);
+    velocity = new PVector(0, 0, 0);
+    gravity = new PVector(0, 0, 0);
+    friction = new PVector(0, 0, 0);
+    
+    frictionMagnitude = 0;
+    mu = 0.02f;
+    normalForce = 1;
+    
+    parent = p;
+  }
+  
+  void update() {
+    gravity.x = PApplet.sin(TangibleGame.rotZ) * GRAVITY_CONSTANT;
+    gravity.z = -PApplet.sin(TangibleGame.rotX) * GRAVITY_CONSTANT;
+
+    frictionMagnitude = normalForce * mu;
+    friction = velocity.get();
+    friction.mult(-1);
+    friction.normalize();
+    friction.mult(frictionMagnitude);
+    
+    velocity.add(gravity);
+    velocity.add(friction);
+    location.add(velocity);
+  }  
+
+  void displayBall3D() {
+      parent.pushMatrix();
+        parent.translate(location.x, -TangibleGame.BOARD_THICKNESS/2-TangibleGame.BALL_RADIUS, location.z);
+        parent.fill(246, 142, 86);
+        parent.lights();
+        parent.sphere(TangibleGame.BALL_RADIUS);
+      parent.popMatrix();      
+  }
+  
+  void displayBall2D() {
+     parent.pushMatrix();
+      parent.translate(location.x + parent.width/2.0f, location.z + parent.height/2.0f, TangibleGame.BALL_RADIUS);
+      parent.fill(246, 142, 86);
+      parent.lights();
+      parent.sphere(TangibleGame.BALL_RADIUS);
+     parent.popMatrix(); 
+  }
+
+  void checkEdges() {
+    if (location.x + TangibleGame.BALL_RADIUS > TangibleGame.BOARD_SIZE/2) {
+      TangibleGame.lastScore = TangibleGame.score;
+      TangibleGame.score -= PApplet.sqrt(PApplet.pow(velocity.x, 2) + PApplet.pow(velocity.z, 2));
+      velocity.x = -velocity.x * ELASTICITY;
+      location.x = TangibleGame.BOARD_SIZE/2 - TangibleGame.BALL_RADIUS;
+    }
+    else if (location.x - TangibleGame.BALL_RADIUS < -TangibleGame.BOARD_SIZE/2) {
+      TangibleGame.lastScore = TangibleGame.score;
+      TangibleGame.score -= PApplet.sqrt(PApplet.pow(velocity.x, 2) + PApplet.pow(velocity.z, 2));
+      velocity.x = -velocity.x * ELASTICITY;
+      location.x = -TangibleGame.BOARD_SIZE/2 + TangibleGame.BALL_RADIUS;
+    }
+    if (location.z + TangibleGame.BALL_RADIUS > TangibleGame.BOARD_SIZE/2) {
+      TangibleGame.lastScore = TangibleGame.score;
+      TangibleGame.score -= PApplet.sqrt(PApplet.pow(velocity.x, 2) + PApplet.pow(velocity.z, 2));
+      velocity.z = -velocity.z * ELASTICITY;
+      location.z = TangibleGame.BOARD_SIZE/2 - TangibleGame.BALL_RADIUS;
+    }
+    else if (location.z - TangibleGame.BALL_RADIUS < -TangibleGame.BOARD_SIZE/2) {
+      TangibleGame.lastScore = TangibleGame.score;
+      TangibleGame.score -= TangibleGame.sqrt(TangibleGame.pow(velocity.x, 2) + TangibleGame.pow(velocity.z, 2));
+      velocity.z = -velocity.z * ELASTICITY;
+      location.z = -TangibleGame.BOARD_SIZE/2 + TangibleGame.BALL_RADIUS;
+    }
+  }
+  
+  void checkCylinderCollision(){
+      for(Cylinder c: cylinders) {
+        float cX = c.location.x - width/2;
+        float cZ = c.location.z - height/2;
+        if(Cylinder.r1 + TangibleGame.BALL_RADIUS >= PApplet.sqrt(PApplet.pow(location.x - cX, 2) + PApplet.pow(location.z - cZ, 2)) ) {
+          TangibleGame.lastScore = TangibleGame.score;
+          TangibleGame.score += PApplet.sqrt(PApplet.pow(velocity.x, 2) + PApplet.pow(velocity.z, 2));
+          PVector n = new PVector(location.x - cX, 0, location.z - cZ);
+          n.normalize();
+          location.x = cX + n.x * (TangibleGame.BALL_RADIUS + Cylinder.r1);
+          location.z = cZ + n.z * (TangibleGame.BALL_RADIUS + Cylinder.r1);
+          float scal = velocity.dot(n) * 2;
+          n.mult(scal);
+          velocity.sub(n);
+          velocity.mult(BOUNCE_FACTOR);
+        }
+      }
+  }
+  
+  private void reduceScore() {
+      TangibleGame.lastScore = TangibleGame.score;
+      TangibleGame.score -= PApplet.sqrt(PApplet.pow(velocity.x, 2) + PApplet.pow(velocity.z, 2));
+  }
+}
