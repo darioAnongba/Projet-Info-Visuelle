@@ -21,6 +21,7 @@ public class TwoDThreeD {
 	
 	// the 3D coordinates of the physical board corners, clockwise
 	static float [][] physicalCorners = {
+							// TODO:
 							// Store here the 3D coordinates of the corners of
 							// the real Lego board, in homogenous coordinates
 							// and clockwise.

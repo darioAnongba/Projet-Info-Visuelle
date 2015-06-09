@@ -57,7 +57,7 @@ public class ImageProcessing extends PApplet {
         ArrayList<PVector> corners;
         corners = hough.hough();	
         //drawQuad(corners);
-        //PVector rotation = twoDthreeD.get3DRotations(corners);
+        //PVector rot = twoDthreeD.get3DRotations(corners);
     }
     
     public PVector intersection(PVector line1, PVector line2) {
