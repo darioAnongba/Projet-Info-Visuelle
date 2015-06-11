@@ -11,7 +11,7 @@ public final class Filters {
 
     private PApplet parent;
 
-    Filters(PApplet p, PImage img) {
+    public Filters(PApplet p, PImage img) {
         this.parent = p;
         this.img = img;
 

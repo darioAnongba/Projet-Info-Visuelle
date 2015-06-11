@@ -12,7 +12,7 @@ public final class Hough {
     private PImage accImg;
     private PApplet parent;
     
-    Hough(PApplet p, PImage img, int minVotes) {
+    public Hough(PApplet p, PImage img, int minVotes) {
         parent = p;
         edgeImg = img;
         this.minVotes = minVotes;
@@ -131,6 +131,8 @@ public final class Hough {
                 float phi = accPhi * discretizationStepsPhi;
 
                 vectorsLines.add(new PVector(r, phi));
+                /*
+                
                 // Cartesian equation of a line: y = ax + b
                 // in polar, y = (-cos(phi)/sin(phi))x + (r/sin(phi))
                 // => y = 0 : x = r / cos(phi)
@@ -169,7 +171,7 @@ public final class Hough {
                     } else {
                         parent.line(x2, y2, x3, y3);
                     }
-                }
+                }*/
         }
         return vectorsLines;
     }

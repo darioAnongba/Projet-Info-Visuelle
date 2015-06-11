@@ -6,7 +6,7 @@ public final class Sobel {
     private PImage img;
     private PApplet parent;
     
-    Sobel(PApplet parent, PImage img) {
+    public Sobel(PApplet parent, PImage img) {
         this.img = img;
         this.parent = parent;
     }

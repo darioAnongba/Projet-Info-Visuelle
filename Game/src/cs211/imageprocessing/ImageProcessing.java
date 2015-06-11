@@ -1,6 +1,7 @@
 package cs211.imageprocessing;
 
 import java.util.*;
+
 import processing.core.*;
 import processing.video.*;
 
@@ -8,7 +9,7 @@ public class ImageProcessing extends PApplet {
 
     private static final long serialVersionUID = 1L;
     
-    public static final int WIDTH    = 640;
+    public static final int WIDTH    = 600;
     public static final int HEIGHT   = 480;
     
     PImage img;
@@ -20,7 +21,7 @@ public class ImageProcessing extends PApplet {
     
     public static PGraphics quadsDraw;
     
-    //TwoDThreeD twoDthreeD;
+    TwoDThreeD twoDthreeD;
     
     public void setup() {
         size(WIDTH, HEIGHT);
@@ -28,20 +29,22 @@ public class ImageProcessing extends PApplet {
         cam = new Movie(this, "testvideo.mp4"); //Put the video in the same directory
         cam.loop();
         
-        /*img = loadImage("board1.jpg");
-        //img.resize(WIDTH, HEIGHT);
+        /*img = loadImage("board3.jpg");
+        img.resize(WIDTH, HEIGHT);
         
         filters = new Filters(this, img);
         sobel = new Sobel(this, filters.getIntensityImg());
         hough = new Hough(this, sobel.img(), 200);*/
         
         quadsDraw = createGraphics(WIDTH, HEIGHT);
+        twoDthreeD = new TwoDThreeD(WIDTH,HEIGHT);
              
         //noLoop();
     }
     
     public void draw() {
         background(255);
+        
         if (cam.available() == true) {
         	cam.read();
         }
@@ -52,12 +55,15 @@ public class ImageProcessing extends PApplet {
         hough = new Hough(this, sobel.img(), 200);
         
         image(img, 0, 0);
+        
         hough.getIntersections();
         
-        ArrayList<PVector> corners;
+        List<PVector> corners;
         corners = hough.hough();	
-        //drawQuad(corners);
-        //PVector rotation = twoDthreeD.get3DRotations(corners);
+        //corners = drawQuad(corners);
+        
+        PVector rot = twoDthreeD.get3DRotations(QuadGraph.sortCorners(corners));
+        println("-> rx : "+degrees(rot.x)+", ry : "+degrees(rot.y)+", rz : "+degrees(rot.z));
     }
     
     public PVector intersection(PVector line1, PVector line2) {
@@ -68,8 +74,9 @@ public class ImageProcessing extends PApplet {
         return new PVector(x, y);
     }
     
-    public void drawQuad(ArrayList<PVector> corners) {
+    public List<PVector> drawQuad(List<PVector> corners) {
 
+    	List<PVector> toReturn = new ArrayList<PVector>();
         QuadGraph qg = new QuadGraph();
         qg.build(corners, WIDTH, HEIGHT);
 
@@ -87,22 +94,27 @@ public class ImageProcessing extends PApplet {
             PVector c23 = intersection(l2, l3);
             PVector c34 = intersection(l3, l4);
             PVector c41 = intersection(l4, l1);
-            if(QuadGraph.isConvex(c12, c23, c34, c41) ) {
+
+            if(QuadGraph.isConvex(c12, c23, c34, c41)
+            		&& QuadGraph.nonFlatQuad(c12, c23, c34, c41)
+            		&& QuadGraph.validArea(c12, c23, c34, c41, 200000, 50000)
+            		) {
                 // Choose a random, semi-transparent colour
                 Random random = new Random();
                 quadsDraw.fill(color(min(255, random.nextInt(300)),
                         min(255, random.nextInt(300)),
                         min(255, random.nextInt(300)), 50));
                 quadsDraw.quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+                
+                toReturn.add(c12);
+                toReturn.add(c23);
+                toReturn.add(c34);
+                toReturn.add(c41);
             }
-
         }
         quadsDraw.endDraw();
         image(quadsDraw,0,0, WIDTH, HEIGHT);
-    }
         
-    public static void main(String[] args) {
-        PApplet.main(new String[] { "--present", "cs211.imageprocessing.ImageProcessing" });
+        return toReturn;
     }
-
 }
