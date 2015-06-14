@@ -28,9 +28,8 @@ public class QuadGraph {
                 	if (i != j) {
                         graph[idx][0] = i;
                         graph[idx][1] = j;
+                        idx++;
                     }
-
-                    idx++;
                 }
             }
         }
@@ -269,7 +268,7 @@ public class QuadGraph {
     public static boolean nonFlatQuad(PVector c1,PVector c2,PVector c3,PVector c4){
         
         // cos(70deg) ~= 0.3
-        float min_cos = 0.8f;
+        float min_cos = 0.6f;
         
         PVector v21= PVector.sub(c1, c2);
         PVector v32= PVector.sub(c2, c3);
@@ -290,11 +289,28 @@ public class QuadGraph {
    }
     
     public static List<PVector> sortCorners(List<PVector> quad){
-    	// Sort corners so that they are ordered clockwise
-    	PVector a = quad.get(0);
-    	PVector b = quad.get(2);
-    	PVector center = new PVector((a.x+b.x)/2,(a.y+b.y)/2);
-    	Collections.sort(quad,new CWComparator(center));
+    	if(!quad.isEmpty()) {
+    		// Sort corners so that they are ordered clockwise
+        	PVector a = quad.get(0);
+        	PVector b = quad.get(2);
+        	PVector center = new PVector((a.x+b.x)/2,(a.y+b.y)/2);
+        	Collections.sort(quad,new CWComparator(center));
+        	
+        	PVector current = quad.get(0);
+            PVector origin = new PVector(0, 0);
+            int counter = 0;
+            
+            for (int i = 1; i < 4; ++i) {
+                PVector a1 = quad.get(i);
+                if (a1.dist(origin) < current.dist(origin)) {
+                    current = a1;
+                    counter = i;
+                }
+                Collections.rotate(quad, counter);
+
+            }
+    	}
+    	
     	return quad;
     }
 }

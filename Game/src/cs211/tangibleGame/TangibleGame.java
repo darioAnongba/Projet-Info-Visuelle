@@ -94,14 +94,23 @@ public class TangibleGame extends PApplet {
 		  sobel = new Sobel(this, filters.getIntensityImg());
 		  hough = new Hough(this, sobel.img(), 200);
 		  
+		  ImageProcessing processing = new ImageProcessing();
+		  
 		  List<PVector> corners;
-	      corners = hough.hough();
+	        corners = hough.hough();	
+	        corners = processing.drawQuad(corners);
+	        List<PVector> sortedCorners = QuadGraph.sortCorners(corners);
 	        
-	      PVector rot = twoDthreeD.get3DRotations(QuadGraph.sortCorners(corners));
-	      rotX = rot.x;
-	      rotY = rot.y;
-	      rotZ = rot.z;
-	      
+	        for (int i = 0; i < sortedCorners.size(); ++i) {
+	            sortedCorners.get(i).z = 1;
+	        }
+	        PVector rot = sortedCorners.isEmpty() ? null : twoDthreeD.get3DRotations(sortedCorners);
+	        
+	        if (rot != null) {
+	          rotX = rot.x;
+	  	      rotY = rot.y;
+	  	      rotZ = rot.z;
+	        }	      
 	      
 		  if(interactionMode){
 		    interactionMode();
@@ -313,5 +322,4 @@ public class TangibleGame extends PApplet {
 	  public static void main(String args[]) {
 	    PApplet.main(new String[] { "--present", "cs211.tangibleGame.TangibleGame" });
 	  }
-
 }

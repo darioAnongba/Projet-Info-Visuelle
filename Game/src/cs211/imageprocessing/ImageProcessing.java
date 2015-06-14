@@ -29,7 +29,7 @@ public class ImageProcessing extends PApplet {
         cam = new Movie(this, "testvideo.mp4"); //Put the video in the same directory
         cam.loop();
         
-        /*img = loadImage("board3.jpg");
+        /*img = loadImage("board1.jpg");
         img.resize(WIDTH, HEIGHT);
         
         filters = new Filters(this, img);
@@ -56,14 +56,20 @@ public class ImageProcessing extends PApplet {
         
         image(img, 0, 0);
         
-        hough.getIntersections();
+        //hough.getIntersections();
         
         List<PVector> corners;
         corners = hough.hough();	
-        //corners = drawQuad(corners);
+        corners = drawQuad(corners);
+        List<PVector> sortedCorners = QuadGraph.sortCorners(corners);
         
-        PVector rot = twoDthreeD.get3DRotations(QuadGraph.sortCorners(corners));
-        println("-> rx : "+degrees(rot.x)+", ry : "+degrees(rot.y)+", rz : "+degrees(rot.z));
+        for (int i = 0; i < sortedCorners.size(); ++i) {
+            sortedCorners.get(i).z = 1;
+        }
+        PVector rot = sortedCorners.isEmpty() ? null : twoDthreeD.get3DRotations(sortedCorners);
+        
+        if (rot != null) 
+        	println("-> rx : "+degrees(rot.x)+", ry : "+degrees(rot.y)+", rz : "+degrees(rot.z));
     }
     
     public PVector intersection(PVector line1, PVector line2) {
@@ -82,8 +88,6 @@ public class ImageProcessing extends PApplet {
 
         List<int[]> quads = qg.findCycles();
 
-        quadsDraw.beginDraw();
-        quadsDraw.clear();
         for (int[] quad : quads) {
             PVector l1 = corners.get(quad[0]);
             PVector l2 = corners.get(quad[1]);
@@ -99,21 +103,15 @@ public class ImageProcessing extends PApplet {
             		&& QuadGraph.nonFlatQuad(c12, c23, c34, c41)
             		&& QuadGraph.validArea(c12, c23, c34, c41, 200000, 50000)
             		) {
-                // Choose a random, semi-transparent colour
-                Random random = new Random();
-                quadsDraw.fill(color(min(255, random.nextInt(300)),
-                        min(255, random.nextInt(300)),
-                        min(255, random.nextInt(300)), 50));
-                quadsDraw.quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
                 
-                toReturn.add(c12);
-                toReturn.add(c23);
-                toReturn.add(c34);
-                toReturn.add(c41);
+                if(toReturn.isEmpty()) {
+	                toReturn.add(c12);
+	                toReturn.add(c23);
+	                toReturn.add(c34);
+	                toReturn.add(c41);
+                }
             }
         }
-        quadsDraw.endDraw();
-        image(quadsDraw,0,0, WIDTH, HEIGHT);
         
         return toReturn;
     }
